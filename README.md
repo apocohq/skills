@@ -18,7 +18,7 @@ Tired of a messy inbox? This skill scans your Gmail, figures out who's emailing 
 
 **Use when:** organizing Gmail, setting up multiple inboxes, managing labels and filters, cleaning up subscriptions.
 
-### things-morning-organize
+### things-morning-organizer
 
 Never sure what to focus on in the morning? This skill reviews your [Things 3](https://culturedcode.com/things/) todos, moves them into the right areas, tags what needs attention, and gives you a prioritized briefing so you know exactly where to start. Learns your areas and tags from a local config that you shape over time.
 
