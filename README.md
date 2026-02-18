@@ -5,7 +5,7 @@ Practical skills that teach AI agents to get things done for you. Built on the [
 ## Installation
 
 ```sh
-uvx skill add apocohq/skills
+npx skills add apocohq/skills
 ```
 
 Also works directly in [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [OpenCode](https://opencode.ai), and other AI tool that support the format.
