@@ -39,16 +39,27 @@ Build `assets/config.json` from the parsed data and confirm the reconstructed co
 
 ### Step 1: Scan Gmail
 
-Search the user's Gmail history (last 6 months) using `search_gmail_messages` to understand what kinds of email they receive. Use broad queries to cast a wide net:
+Search the user's Gmail history using `search_gmail_messages` to build a comprehensive picture of who emails them. Run multiple queries and merge the results — the goal is to discover **all** non-personal sender domains.
 
+**Broad sweep (most important — do this first):**
+- `newer_than:6m` — all emails from the last 6 months. Paginate through results to collect as many senders as possible.
+- `newer_than:1m` — recent emails, captures current high-frequency senders
+
+**Category-based (catches things the broad sweep may paginate past):**
 - `category:promotions` — marketing, newsletters
 - `category:updates` — notifications, shipping, orders
+- `category:social` — social media notifications
 - `category:forums` — mailing lists, digests
-- `unsubscribe` — anything with an unsubscribe link
-- `subject:order OR subject:invoice OR subject:receipt OR subject:shipping`
-- `subject:objednávka OR subject:faktura OR subject:potvrzení OR subject:doručení` (Czech equivalents — adapt based on user's language)
 
-Collect sender addresses, extract domains, group by domain, count frequency. Ignore generic providers (`gmail.com`, `outlook.com`, `yahoo.com`, etc.).
+**Signal-based:**
+- `unsubscribe` — anything with an unsubscribe link (broad, catches most automated mail)
+- `from:noreply OR from:no-reply OR from:notifications OR from:info@` — automated senders
+
+**Localized subject searches (adapt based on user's language):**
+- `subject:order OR subject:invoice OR subject:receipt OR subject:shipping OR subject:confirmation`
+- Czech: `subject:objednávka OR subject:faktura OR subject:potvrzení OR subject:doručení`
+
+**Aggregate results:** collect all sender addresses, extract domains, group by domain, count frequency. Ignore generic providers (`gmail.com`, `outlook.com`, `yahoo.com`, `hotmail.com`, `icloud.com`, `seznam.cz`, etc.) — these are personal contacts, not automated senders.
 
 ### Step 2: Suggest Categories
 
@@ -166,10 +177,17 @@ Search Gmail for senders that pollute the inbox. Focus on:
 - **Redundant notifications** — emails that duplicate information available elsewhere: order status (check the app), shipping updates (carrier app), calendar reminders, password change confirmations, login alerts from low-risk services.
 
 Use broad queries to discover candidates:
+- `unsubscribe newer_than:6m` — anything with an unsubscribe link in the last 6 months (widest net)
 - `category:promotions` — marketing and newsletters
 - `category:updates` — transactional notifications
-- `unsubscribe` — anything with an unsubscribe link
+- `category:social` — social media digests and notifications
+- `from:noreply OR from:no-reply OR from:notifications` — automated senders
 - `subject:newsletter OR subject:digest OR subject:weekly OR subject:monthly`
+
+Then for each discovered domain, measure engagement:
+- Total emails: `from:domain.com newer_than:6m`
+- Unread emails: `is:unread from:domain.com newer_than:6m`
+- Any replies: compare count of `from:domain.com` vs `from:domain.com -in:sent`
 
 Exclude senders already managed in the config (they're already categorized).
 
