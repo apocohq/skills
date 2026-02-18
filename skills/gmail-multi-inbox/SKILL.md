@@ -10,7 +10,7 @@ description: |
 
 Gmail's Multiple Inboxes displays up to 5 custom sections alongside the main inbox. Each section shows emails matching a search query. This skill uses a **label + filter** approach: label-based sections get Gmail filters that auto-label incoming mail by sender domain. The output is always a Google Apps Script the user pastes into script.google.com.
 
-The generated script is idempotent — safe to re-run after adding new senders.
+The generated script is idempotent — safe to re-run after adding or removing senders. When senders are removed from the lists, `setupAll()` automatically deletes the corresponding Gmail filters.
 
 ## Configuration
 
@@ -73,10 +73,17 @@ Read the template from `scripts/gmail-multi-inbox-template.js` in this skill's d
 Fill in the placeholders:
 - `__SENDER_ARRAYS__` — one `var` array per label-based section with the confirmed sender domains
 - `__LABEL_CONFIGS__` — `createLabelIfNeeded('labelname')` calls for each label-based section
+- `__STALE_FILTER_CLEANUP__` — a `removeStaleFilters([...])` call listing all managed label/sender pairs. This lets the script detect and delete Gmail filters whose sender was removed from the lists. Example:
+  ```
+  removeStaleFilters([
+    { senders: workSenders, label: 'work' },
+    { senders: newsletterSenders, label: 'newsletter' }
+  ]);
+  ```
 - `__FILTER_CREATION__` — for each label-based section: loop over its sender array calling `createFilterIfNeeded(sender, label)`, then call `retroLabel(senderArray, label)`. For work labels, add `{ matchToAndCc: ['companydomain.com'] }`
 - `__MULTI_INBOX_CONFIG__` — comment block listing each section's query and name for the user to enter in Gmail Settings
 
-Save the generated script as `gmail-multi-inbox-setup.js` in the user's working directory.
+Save the generated script as `assets/gmail-multi-inbox-setup.js` inside this skill's directory.
 
 ### Step 4: Save Configuration
 
@@ -110,12 +117,13 @@ Tell the user:
 When `assets/config.json` exists:
 
 1. Show the user their current configuration (sections + sender counts)
-2. Ask what they want to do: scan for new senders, add specific senders manually, modify sections, or get unsubscribe suggestions
+2. Ask what they want to do: scan for new senders, add specific senders manually, remove senders, modify sections, or get unsubscribe suggestions
 3. If scanning: re-run the Gmail searches from Step 1, compare against existing sender lists, and present only **new** domains not yet in the config
 4. Let the user confirm which new domains to add and to which categories
-5. Regenerate the Apps Script with the merged sender lists
-6. Update `assets/config.json`
-7. User pastes the updated script and re-runs `setupAll()`
+5. **Before generating the script**, compare the new sender lists against the previous `assets/config.json`. If any senders were removed, explicitly list them with their section names and ask the user to confirm. The generated script will delete the corresponding Gmail filters when run — make sure the user understands this. Do NOT generate the script until the user confirms the removals.
+6. Regenerate the Apps Script with the updated sender lists and save to `assets/gmail-multi-inbox-setup.js`
+7. Update `assets/config.json`
+8. User pastes the updated script and re-runs `setupAll()`
 
 ## Unsubscribe Suggestions
 

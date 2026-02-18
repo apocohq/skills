@@ -9,9 +9,9 @@
  * 5. Run setupAll()
  * 6. Authorize when prompted (it needs Gmail access)
  *
- * TO ADD NEW SENDERS LATER:
- * - Add the sender domain/address to the appropriate array below
- * - Run setupAll() again (it's safe to re-run, won't duplicate)
+ * TO ADD OR REMOVE SENDERS:
+ * - Add/remove sender domains in the appropriate array below
+ * - Run setupAll() again — it creates new filters AND removes stale ones
  *
  * AFTER RUNNING THIS SCRIPT, configure Multiple Inboxes in Gmail:
  * Go to Gmail Settings > Inbox > Inbox type > Multiple Inboxes
@@ -33,6 +33,9 @@ function setupAll() {
 
   // Create labels
 __LABEL_CONFIGS__
+
+  // Remove stale filters for senders that have been removed
+__STALE_FILTER_CLEANUP__
 
   // Create filters and retroactively label existing emails
 __FILTER_CREATION__
@@ -81,6 +84,43 @@ function getLabelId(labelName) {
     }
   }
   throw new Error('Label not found: ' + labelName + '. Make sure createLabelIfNeeded ran first.');
+}
+
+function removeStaleFilters(managedConfig) {
+  Logger.log('--- Removing stale filters ---');
+  var existingFilters = Gmail.Users.Settings.Filters.list('me').filter || [];
+
+  // Build a map of labelId -> current sender list
+  var managedLabels = {};
+  managedConfig.forEach(function(config) {
+    try {
+      var labelId = getLabelId(config.label);
+      managedLabels[labelId] = config.senders.map(function(s) { return s.toLowerCase(); });
+    } catch (e) {
+      // Label doesn't exist yet, nothing to clean up
+    }
+  });
+
+  existingFilters.forEach(function(filter) {
+    var addLabelIds = (filter.action && filter.action.addLabelIds) || [];
+    var fromCriteria = filter.criteria && filter.criteria.from;
+    if (!fromCriteria) return;
+
+    for (var i = 0; i < addLabelIds.length; i++) {
+      var labelId = addLabelIds[i];
+      if (managedLabels[labelId]) {
+        if (managedLabels[labelId].indexOf(fromCriteria.toLowerCase()) === -1) {
+          try {
+            Gmail.Users.Settings.Filters.remove('me', filter.id);
+            Logger.log('Removed stale filter: from:' + fromCriteria);
+          } catch (e) {
+            Logger.log('Error removing filter for ' + fromCriteria + ': ' + e.message);
+          }
+        }
+        break;
+      }
+    }
+  });
 }
 
 function retroLabel(senderList, labelName, options) {
