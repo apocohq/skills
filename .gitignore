@@ -55,3 +55,4 @@ Thumbs.db
 Desktop.ini
 
 skills/*/assets/*
+!skills/*/assets/.gitkeep
