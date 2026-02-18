@@ -1,11 +1,11 @@
 # Apoco Skills
 
-Skills that teach AI agents to handle real daily tasks for you. Built on the [Agent Skills](https://github.com/vercel-labs/agent-skills) format.
+Practical skills that teach AI agents to get things done for you. Built on the [Agent Skills](https://github.com/vercel-labs/agent-skills) format.
 
 ## Installation
 
 ```sh
-uvx skill add ApocoHQ/skills
+uvx skill add apocohq/skills
 ```
 
 Also works directly in [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [OpenCode](https://opencode.ai), and other AI tool that support the format.
