@@ -11,21 +11,16 @@ Help the user start their day by organizing their Things todos and providing a c
 
 Check for `assets/config.json` in this skill's directory.
 
-**If config exists** → Load it and proceed to Step 1 (returning user).
+**If config exists** → Load it and proceed to Step 1.
 
-**If config does NOT exist** → Ask the user:
-> "I don't have a configuration yet. Do you have an existing config file to provide, or should we set one up together?"
+**If config does NOT exist** → Auto-generate it:
 
-- **User provides config** → Save to `assets/config.json`, proceed to Step 1.
-- **User wants setup** → Run Initial Setup (below).
-
-### Initial Setup
-
-1. Fetch the user's Things areas with `things_get_areas`
-2. For each area, ask the user for a short description of what belongs there
-3. Ask what tags they use and what each means
-4. Ask about daily routine todos (recurring tasks to auto-create on weekdays)
-5. Save config to `assets/config.json`
+1. Fetch areas (`things_get_areas`) and tags (`things_get_tags`)
+2. Fetch todos across all lists (`things_get_today`, `things_get_anytime`, `things_get_upcoming`, `things_get_someday`) to infer what each area and tag is used for
+3. Generate short descriptions for each area and tag based on the todos they contain
+4. Ask the user if they have any daily routine todos (recurring tasks to auto-create on weekdays), or skip if they don't
+5. Present the generated config for confirmation, then save to `assets/config.json`
+6. Proceed to Step 1
 
 ### Config Format
 
@@ -47,7 +42,7 @@ Check for `assets/config.json` in this skill's directory.
 }
 ```
 
-Areas, tags, and daily routines are fully customizable. The examples above are defaults — the user defines what fits their workflow.
+Areas, tags, and daily routines are fully customizable. The examples above are defaults — the user defines what fits their workflow. A `null` area means uncategorized.
 
 ## Step 1. Gather Data
 
@@ -55,44 +50,32 @@ Call in parallel: `things_get_today`, `things_get_inbox`, `things_get_areas`, `t
 
 Check day of week with `date` (working days Mon-Fri have daily habits).
 
-## Step 2. Create Daily Routine Todos (Weekdays Only)
+## Step 2. Categorize, Move & Tag
 
-Check if the todos from `daily_routine` in config exist in Today. If missing, create each with `things_add_todo`:
-- `when`: today
-- `area`: as specified in config (null = uncategorized)
-
-Match flexibly (case-insensitive, similar wording counts). Skip on weekends.
-
-**IMPORTANT:** When categorizing in Step 3, skip daily routine todos — they should keep their configured area (or stay uncategorized if area is null).
-
-## Step 3. Categorize, Move & Tag Items
-
-**IMPORTANT:** Only process items that haven't been categorized or tagged yet. Skip items that already have areas or tags.
-
-**EXCLUDE from categorization:** Daily routine todos from config — these must keep their configured state.
+Process items from Today, Inbox, and Anytime that are missing an area or tags. Skip items that already have them.
 
 ### A. Categorize Uncategorized Items
 
-For items **without an area** (except daily routine todos), use the area descriptions from config to determine the best fit. Move with `things_update_todo` (use `list_id` or `list` param).
-
-Use the area descriptions to infer where each todo belongs. If a todo doesn't clearly fit any area, flag it in the briefing.
+For items without an area, use the config area descriptions to determine the best fit and move with `things_update_todo`. If a todo doesn't clearly fit any area, flag it in the briefing.
 
 ### B. Tag Untagged Items
 
-Apply tags **ONLY to items that have no tags** using `things_update_todo`.
+For items without tags, use the config tag descriptions to determine which apply. Tag generously — if it qualifies, tag it. Flag genuinely ambiguous items in the briefing.
 
-Use the tag descriptions from config to determine which tags apply. Be aggressive — tag everything that qualifies. Leave ambiguous items and flag in briefing.
+**Wait for all `things_update_todo` calls to complete before proceeding.**
 
-### C. Apply All Changes to Things
+## Step 3. Create Daily Routine Todos (Weekdays Only)
 
-**CRITICAL:** Complete ALL `things_update_todo` calls and wait for confirmation before proceeding to Step 4. The brief must reflect the actual state in Things after all changes are applied.
+Check if the todos from `daily_routine` in config exist in Today. If missing, create each with `things_add_todo` set to today, with the area from config.
+
+Match flexibly (case-insensitive, similar wording counts). Skip on weekends.
 
 ## Step 4. Prioritize & Brief
 
-Use Drucker's "Effective Executive" lens:
+Use Peter Drucker's "Effective Executive" lens — prioritize by contribution, not busyness. *"First things first, second things not at all."*
 
-**🔴 Must do** — Deadlines, meetings, items tagged as high priority. *"What can only I do today?"*
-**🟡 Should do** — High-impact strategic work. *"Greatest contribution?"*
+**🔴 Must do** — Deadlines, meetings, items tagged as high priority. *"What can only I do that, if done really well, will make a real difference?"*
+**🟡 Should do** — High-impact strategic work. *"What is the greatest contribution I can make?"*
 **🟢 Could do** — Non-urgent items, learning, low-priority personal.
 **📋 Daily Routine** — Items from `daily_routine` in config.
 
@@ -100,8 +83,10 @@ Output brief summary:
 ```
 Good morning! [weekend note if applicable]
 
+> "[Relevant Drucker quote for the day]"
+
 🔴 Must do (X)
-- **[item]** — [strategic why]
+- **[item]** — [why this matters today]
 
 🟡 Should do (X)
 - **[item]**
@@ -114,12 +99,14 @@ Good morning! [weekend note if applicable]
 
 Categorized: X items moved
 [Ambiguous items if any]
-[Strategic note if >15 items or key focus]
+[Drucker-inspired closing nudge — e.g. "You have 3 must-dos. Protect your morning for the one that only you can do." or "Heavy list today — what can you delegate or defer?"]
 ```
 
 Keep it tight. 30 seconds to read max.
 
 ## Creating Todos
+
+If no config exists yet, run Step 0 first.
 
 When the user asks to add a todo to Things:
 
@@ -130,9 +117,7 @@ When the user asks to add a todo to Things:
 
 ## Principles
 
-- Move items aggressively to proper areas
-- Don't change scheduling (today/tomorrow/someday)
+- Don't change scheduling (today/tomorrow/someday) — but inbox items without a clear schedule should be moved to Today if actionable, or flagged in the briefing
 - **NEVER delete or mark todos complete** unless user explicitly requests it
 - Be opinionated about priority
-- Respect weekends
 - Focus on contribution and impact
