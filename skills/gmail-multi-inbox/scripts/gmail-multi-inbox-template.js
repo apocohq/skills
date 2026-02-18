@@ -7,12 +7,11 @@
  * 3. Paste this entire script
  * 4. In the left sidebar, click + next to "Services" and enable "Gmail API"
  * 5. Run setupAll() and authorize when prompted
- * 6. Run retroLabelAll() to label existing emails (first run, or after adding senders)
+ *    (this creates labels, updates filters, and retro-labels existing emails)
  *
  * TO ADD OR REMOVE SENDERS:
  * - Add/remove sender domains in the appropriate array below
- * - Run setupAll() to update filters (creates new ones, removes stale ones)
- * - Run retroLabelAll() to label historical emails from any newly added senders
+ * - Run setupAll() again
  *
  * AFTER RUNNING THIS SCRIPT, configure Multiple Inboxes in Gmail:
  * Go to Gmail Settings > Inbox > Inbox type > Multiple Inboxes
@@ -44,6 +43,9 @@ __STALE_FILTER_CLEANUP__
 
   // Create filters for each sender
 __FILTER_CREATION__
+
+  // Retroactively label existing emails
+  retroLabelAll();
 
   Logger.log('=== Done! Now configure Multiple Inboxes in Gmail Settings. ===');
 }

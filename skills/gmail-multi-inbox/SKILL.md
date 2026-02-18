@@ -115,8 +115,7 @@ Tell the user:
 
 1. Go to **script.google.com** → New project → paste the script
 2. In the sidebar, click **+** next to "Services" and enable **Gmail API**
-3. Run `setupAll()` and authorize when prompted — this creates labels and filters
-4. Run `retroLabelAll()` — this labels existing/historical emails (may take a while on first run)
+3. Run `setupAll()` and authorize when prompted — this creates labels, updates filters, and retro-labels existing emails
 
 **Part B — Configure Multiple Inboxes manually:**
 
@@ -150,20 +149,49 @@ When `assets/config.json` exists:
 5. **Before generating the script**, compare the new sender lists against the previous `assets/config.json`. If any senders were removed, explicitly list them with their section names and ask the user to confirm. The generated script will delete the corresponding Gmail filters when run — make sure the user understands this. Do NOT generate the script until the user confirms the removals.
 6. Regenerate the Apps Script with the updated sender lists and save to `assets/gmail-multi-inbox-setup.js`
 7. Update `assets/config.json`
-8. User pastes the updated script and re-runs `setupAll()`
-9. If new senders were added, tell the user to also run `retroLabelAll()` to label historical emails from the new senders
-10. If any section queries or names changed, remind the user to update their Multiple Inboxes settings manually in Gmail (see Step 5, Part B from Initial Setup). Present the updated table of sections.
+8. User pastes the updated script and re-runs `setupAll()` (this handles filters and retro-labeling in one go)
+9. If any section queries or names changed, remind the user to update their Multiple Inboxes settings manually in Gmail (see Step 5, Part B from Initial Setup). Present the updated table of sections.
 
 ## Unsubscribe Suggestions
 
 When the user asks for inbox cleanup or unsubscribe suggestions:
 
-1. Search Gmail for senders with high frequency but low engagement — emails the user rarely opens or replies to. Use queries like:
-   - `is:unread from:domain.com` — count unread vs total to estimate engagement
-   - Look for senders with many emails but no replies (`from:domain.com -in:sent`)
-2. Present a ranked list of "noisy" senders with email counts
-3. For each, suggest: keep (and categorize), unsubscribe, or block
-4. The unsubscribe action is manual — provide the user with the sender info so they can unsubscribe themselves. Do NOT generate script code to delete or archive emails without explicit user approval.
+### Step 1: Identify noisy senders
+
+Search Gmail for senders that pollute the inbox. Focus on:
+
+- **High volume, low engagement** — many emails, most unread. Compare `from:domain.com` (total) vs `is:unread from:domain.com` (unread) to estimate open rate.
+- **Never replied to** — `from:domain.com -in:sent` has the same count as `from:domain.com`, meaning the user never interacts with this sender.
+- **Promotional / transactional noise** — marketing emails, "we miss you" campaigns, loyalty programs, app notifications that duplicate push/in-app notifications (e.g. social media activity digests, app usage summaries, "someone liked your post").
+- **Redundant notifications** — emails that duplicate information available elsewhere: order status (check the app), shipping updates (carrier app), calendar reminders, password change confirmations, login alerts from low-risk services.
+
+Use broad queries to discover candidates:
+- `category:promotions` — marketing and newsletters
+- `category:updates` — transactional notifications
+- `unsubscribe` — anything with an unsubscribe link
+- `subject:newsletter OR subject:digest OR subject:weekly OR subject:monthly`
+
+Exclude senders already managed in the config (they're already categorized).
+
+### Step 2: Present recommendations
+
+Group the noisy senders into tiers:
+
+1. **Unsubscribe** — high volume, never read, no value (e.g. marketing from a store you bought from once, app notification digests)
+2. **Consider unsubscribing** — moderate volume, rarely read, value is questionable or available elsewhere
+3. **Keep but categorize** — useful but noisy — suggest adding to a section in the multi-inbox config instead
+
+For each sender, show:
+- Sender domain and example "From" name
+- Email count (last 6 months)
+- Estimated open rate (read vs total)
+- Why it's flagged (e.g. "94 emails, 2% opened", "duplicates push notifications")
+
+### Step 3: Act on user choices
+
+- **Unsubscribe**: the action is manual — provide the sender info so the user can unsubscribe themselves. Do NOT generate script code to delete or archive emails without explicit user approval.
+- **Categorize**: add the sender to the appropriate section in the config and regenerate the script.
+- **Block**: explain how to block in Gmail (three dots → Block "sender"). This is also manual.
 
 ## Important Notes
 
