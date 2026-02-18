@@ -12,6 +12,10 @@ Gmail's Multiple Inboxes displays up to 5 custom sections alongside the main inb
 
 The generated script is idempotent — safe to re-run after adding or removing senders. When senders are removed from the lists, `setupAll()` automatically deletes the corresponding Gmail filters.
 
+## Prerequisites
+
+This skill requires a **Gmail MCP connector** (e.g. `search_gmail_messages`) to scan the user's inbox. Gmail does not have an official MCP server — the user must have a third-party Gmail connector configured. If no Gmail connector is available, the skill can still work in a limited way: skip the scanning steps and let the user provide sender domains manually, or import from an existing script.
+
 ## Configuration
 
 The skill stores its current configuration in `assets/config.json` inside this skill's directory. This file tracks:
@@ -168,3 +172,12 @@ When the user asks for inbox cleanup or unsubscribe suggestions:
 - `from:domain.com` matches any `@domain.com` address and subdomains.
 - One filter per sender domain (no complex boolean logic in a single Gmail filter).
 - Check the user's email for language clues and adapt search queries accordingly.
+- **Label colors must use Gmail's predefined hex values.** Arbitrary colors will be rejected by the API. Allowed background colors (pair with `#000000` or `#ffffff` text for contrast):
+  - Reds: `#fb4c2f`, `#e66550`, `#cc3a21`, `#ac2b16`, `#822111`, `#f6c5be`, `#efa093`
+  - Oranges: `#ffad47`, `#ffbc6b`, `#eaa041`, `#cf8933`, `#a46a21`, `#ffe6c7`, `#ffd6a2`
+  - Yellows: `#fad165`, `#fcda83`, `#f2c960`, `#d5ae49`, `#aa8831`, `#fef1d1`, `#fce8b3`
+  - Greens: `#16a766`, `#44b984`, `#149e60`, `#0b804b`, `#076239`, `#b9e4d0`, `#89d3b2`, `#43d692`, `#68dfa9`, `#3dc789`, `#2a9c68`, `#1a764d`, `#c6f3de`, `#a0eac9`
+  - Blues: `#4a86e8`, `#6d9eeb`, `#3c78d8`, `#285bac`, `#1c4587`, `#c9daf8`, `#a4c2f4`
+  - Purples: `#a479e2`, `#b694e8`, `#8e63ce`, `#653e9b`, `#41236d`, `#e4d7f5`, `#d0bcf1`
+  - Pinks: `#f691b3`, `#f7a7c0`, `#e07798`, `#b65775`, `#83334c`, `#fcdee8`, `#fbc8d9`
+  - Grays: `#000000`, `#434343`, `#666666`, `#999999`, `#cccccc`, `#efefef`, `#f3f3f3`, `#ffffff`
