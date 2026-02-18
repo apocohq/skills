@@ -53,3 +53,5 @@ logs/
 # OS generated files
 Thumbs.db
 Desktop.ini
+
+skills/*/assets/*

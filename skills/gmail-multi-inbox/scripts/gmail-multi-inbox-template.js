@@ -6,12 +6,13 @@
  * 2. Create a new project
  * 3. Paste this entire script
  * 4. In the left sidebar, click + next to "Services" and enable "Gmail API"
- * 5. Run setupAll()
- * 6. Authorize when prompted (it needs Gmail access)
+ * 5. Run setupAll() and authorize when prompted
+ * 6. Run retroLabelAll() to label existing emails (first run, or after adding senders)
  *
  * TO ADD OR REMOVE SENDERS:
  * - Add/remove sender domains in the appropriate array below
- * - Run setupAll() again — it creates new filters AND removes stale ones
+ * - Run setupAll() to update filters (creates new ones, removes stale ones)
+ * - Run retroLabelAll() to label historical emails from any newly added senders
  *
  * AFTER RUNNING THIS SCRIPT, configure Multiple Inboxes in Gmail:
  * Go to Gmail Settings > Inbox > Inbox type > Multiple Inboxes
@@ -28,6 +29,10 @@ __SENDER_ARRAYS__
 // SCRIPT LOGIC — no need to edit below this line
 // ============================================================
 
+/**
+ * Creates labels, updates filters, and removes stale filters.
+ * Run this every time you change the sender lists.
+ */
 function setupAll() {
   Logger.log('=== Gmail Multi-Inbox Setup ===');
 
@@ -37,18 +42,42 @@ __LABEL_CONFIGS__
   // Remove stale filters for senders that have been removed
 __STALE_FILTER_CLEANUP__
 
-  // Create filters and retroactively label existing emails
+  // Create filters for each sender
 __FILTER_CREATION__
 
   Logger.log('=== Done! Now configure Multiple Inboxes in Gmail Settings. ===');
 }
 
-function createLabelIfNeeded(labelName) {
-  var label = GmailApp.getUserLabelByName(labelName);
-  if (label) {
+/**
+ * Labels existing/historical emails from the sender lists.
+ * Run this on first setup or after adding new senders.
+ * Not needed on every run — filters handle new incoming emails.
+ */
+function retroLabelAll() {
+  Logger.log('=== Retroactively labeling existing emails ===');
+
+__RETRO_LABEL__
+
+  Logger.log('=== Retro-labeling done! ===');
+}
+
+function createLabelIfNeeded(labelName, color) {
+  var existing = GmailApp.getUserLabelByName(labelName);
+  if (existing) {
     Logger.log('Label "' + labelName + '" already exists.');
+    // Update color if specified
+    if (color) {
+      Gmail.Users.Labels.update({ color: color }, 'me', getLabelId(labelName));
+      Logger.log('Updated color for "' + labelName + '".');
+    }
   } else {
-    GmailApp.createLabel(labelName);
+    var labelBody = {
+      name: labelName,
+      labelListVisibility: 'labelShow',
+      messageListVisibility: 'show'
+    };
+    if (color) labelBody.color = color;
+    Gmail.Users.Labels.create(labelBody, 'me');
     Logger.log('Created label "' + labelName + '".');
   }
 }
@@ -123,6 +152,19 @@ function removeStaleFilters(managedConfig) {
   });
 }
 
+function labelAllMatching(query, label) {
+  var BATCH = 100;
+  var total = 0;
+  while (true) {
+    var threads = GmailApp.search(query, 0, BATCH);
+    if (threads.length === 0) break;
+    label.addToThreads(threads);
+    total += threads.length;
+    if (threads.length < BATCH) break;
+  }
+  return total;
+}
+
 function retroLabel(senderList, labelName, options) {
   options = options || {};
   var label = GmailApp.getUserLabelByName(labelName);
@@ -132,32 +174,20 @@ function retroLabel(senderList, labelName, options) {
   }
 
   senderList.forEach(function(sender) {
-    var query = 'from:' + sender + ' -label:' + labelName;
-    var threads = GmailApp.search(query, 0, 100);
-    if (threads.length > 0) {
-      label.addToThreads(threads);
-      Logger.log('Labeled ' + threads.length + ' existing threads from ' + sender + ' as ' + labelName);
-    } else {
-      Logger.log('No unlabeled threads found from ' + sender);
-    }
+    var count = labelAllMatching('from:' + sender + ' -label:' + labelName, label);
+    Logger.log(count > 0
+      ? 'Labeled ' + count + ' existing threads from ' + sender + ' as ' + labelName
+      : 'No unlabeled threads found from ' + sender);
   });
 
-  // For work/company labels, also catch emails TO and CC the domain
+  // Also catch emails TO and CC the listed domains (useful for work/company labels)
   if (options.matchToAndCc) {
     options.matchToAndCc.forEach(function(domain) {
-      var toQuery = 'to:' + domain + ' -label:' + labelName;
-      var toThreads = GmailApp.search(toQuery, 0, 100);
-      if (toThreads.length > 0) {
-        label.addToThreads(toThreads);
-        Logger.log('Labeled ' + toThreads.length + ' threads to ' + domain + ' as ' + labelName);
-      }
+      var toCount = labelAllMatching('to:' + domain + ' -label:' + labelName, label);
+      if (toCount > 0) Logger.log('Labeled ' + toCount + ' threads to ' + domain + ' as ' + labelName);
 
-      var ccQuery = 'cc:' + domain + ' -label:' + labelName;
-      var ccThreads = GmailApp.search(ccQuery, 0, 100);
-      if (ccThreads.length > 0) {
-        label.addToThreads(ccThreads);
-        Logger.log('Labeled ' + ccThreads.length + ' threads cc ' + domain + ' as ' + labelName);
-      }
+      var ccCount = labelAllMatching('cc:' + domain + ' -label:' + labelName, label);
+      if (ccCount > 0) Logger.log('Labeled ' + ccCount + ' threads cc ' + domain + ' as ' + labelName);
     });
   }
 }
