@@ -21,7 +21,7 @@ Check for `assets/config.json` in this skill's directory.
 
 1. Fetch areas (`things_get_areas`) and tags (`things_get_tags`)
 2. Fetch todos across all lists (`things_get_today`, `things_get_anytime`, `things_get_upcoming`, `things_get_someday`) to infer what each area and tag is used for
-3. Generate short descriptions for each area and tag based on the todos they contain
+3. Generate short descriptions and examples for each area and tag based on the todos they contain
 4. Ask the user if they have any daily routine todos (recurring tasks to auto-create on weekdays), or skip if they don't
 5. Present the generated config for confirmation, then save to `assets/config.json`
 6. Proceed to Step 1
@@ -31,13 +31,28 @@ Check for `assets/config.json` in this skill's directory.
 ```json
 {
   "areas": {
-    "work": "Day job tasks, meetings, team communication",
-    "personal": "Family, home, errands, health"
+    "work": {
+      "description": "Day job tasks, meetings, team communication",
+      "examples": ["Prepare slides for team standup", "Review PR from Sarah"]
+    },
+    "personal": {
+      "description": "Family, home, errands, health",
+      "examples": ["Book dentist appointment", "Pick up groceries"]
+    }
   },
   "tags": {
-    "important": "High priority — deadlines, strategic impact, time-sensitive",
-    "waiting": "Blocked on someone else — need feedback, pending response",
-    "quick": "Under 15 minutes — quick wins, simple checks"
+    "important": {
+      "description": "Has a hard deadline, scheduled meeting, or clear strategic urgency",
+      "examples": ["Submit tax return by Friday", "Prepare board deck for Monday"]
+    },
+    "waiting": {
+      "description": "Explicitly blocked on another person — waiting for someone or pending a response",
+      "examples": ["Waiting for John to review contract", "Pending approval from finance"]
+    },
+    "quick": {
+      "description": "Single-step task under 15 minutes — not multi-step work",
+      "examples": ["Reply to Sarah's Slack message", "Check build status"]
+    }
   },
   "daily_routine": [
     { "title": "Check email", "area": null },
@@ -47,6 +62,8 @@ Check for `assets/config.json` in this skill's directory.
 ```
 
 Areas, tags, and daily routines are fully customizable. The examples above are defaults — the user defines what fits their workflow. A `null` area means uncategorized.
+
+Each area and tag has up to 10 examples. Examples should cover distinct categories without overlap — no need to fill all 10 slots, just enough to represent the range.
 
 ## Step 1. Gather Data
 
@@ -60,11 +77,11 @@ Process items from Today, Inbox, and Anytime that are missing an area or tags. S
 
 ### A. Categorize Uncategorized Items
 
-For items without an area, use the config area descriptions to determine the best fit and move with `things_update_todo`. If a todo doesn't clearly fit any area, flag it in the briefing.
+For items without an area, use the config area descriptions and examples to determine the best fit and move with `things_update_todo`. If a todo doesn't clearly fit any area, flag it in the briefing.
 
 ### B. Tag Untagged Items
 
-For items without tags, use the config tag descriptions to determine which apply. **Be conservative** — only apply a tag when the todo title clearly and obviously matches the tag description. Do not infer or guess.
+For items without tags, use the config tag descriptions and examples to determine which apply. **Be conservative** — only apply a tag when the todo title clearly and obviously matches the tag description and is similar to the examples. Do not infer or guess.
 
 **Wait for all `things_update_todo` calls to complete before proceeding.**
 
@@ -115,7 +132,7 @@ If no config exists yet, run Step 0 first.
 When the user asks to add a todo to Things:
 
 1. **Rephrase for clarity** — Convert the user's message into a clear, actionable todo title in English
-2. **Assign to area** — Use config area descriptions to pick the best fit; default to the first area if ambiguous
+2. **Assign to area** — Use config area descriptions and examples to pick the best fit; default to the first area if ambiguous
 3. **Schedule appropriately** — Use `when="today"` by default, or adjust based on context
 4. **Extract details** — If the message contains specific information (names, numbers, deadlines), include them in the title or notes
 
@@ -129,7 +146,7 @@ Activate when the user asks to run in learning mode (e.g. "learning mode", "lear
    - Todos that don't fit any existing area well
    - Todos where no tag description clearly applies but a tag probably should
    - Area or tag descriptions that are too narrow to cover the todos they contain
-4. Propose config updates — refine descriptions, add new areas or tags if needed
+4. Propose config updates — refine area and tag descriptions, add/rotate examples, add new areas or tags if needed
 5. Present the diff to the user for confirmation, then save to `assets/config.json`
 6. Ask the user if they want to proceed with the normal morning review (Steps 1-4)
 
