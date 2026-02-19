@@ -4,6 +4,7 @@ description: "Morning review and prioritization of Things todos. Use this skill 
 metadata:
   author: apoco
   version: "1.0.0"
+  argument-hint: "[learning]"
 ---
 
 # Morning Review
