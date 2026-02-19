@@ -29,6 +29,7 @@ Features:
 - **Drucker-style briefing** — Prioritizes your day into Must do / Should do / Could do using Peter Drucker's "Effective Executive" lens, with a motivational quote.
 - **Todo creation** — Add todos by describing them naturally; the skill rephrases, assigns an area, and schedules them.
 - **Learning mode** — Run with `[learning]` to compare your todos against the config and refine area/tag descriptions and examples over time.
+- **Idempotent** — Safe to run multiple times a day. Skips items that already have areas and tags, and won't duplicate daily routine todos.
 
 **Use when:** starting your day, triaging todos, organizing tasks by area and priority, adding new todos.
 
