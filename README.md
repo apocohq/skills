@@ -20,7 +20,7 @@ Tired of a messy inbox? This skill scans your Gmail, figures out who's emailing 
 
 ### things-morning-organizer
 
-Never sure what to focus on in the morning? This skill reviews your [Things 3](https://culturedcode.com/things/) todos, moves them into the right areas, tags what needs attention, and gives you a prioritized briefing so you know exactly where to start.
+Never sure what to focus on in the morning? Born out of spending 15–25 minutes every Monday manually sorting through 40+ todos ([full story](https://www.havlena.com/p/i-automated-monday-morning-triage)), this skill reviews your [Things 3](https://culturedcode.com/things/) todos, moves them into the right areas, tags what needs attention, and gives you a prioritized 30-second briefing so you know exactly where to start.
 
 Features:
 - **Auto-generated config** — On first run, scans your existing todos, areas, and tags to build a config with descriptions and examples. No manual setup needed.
