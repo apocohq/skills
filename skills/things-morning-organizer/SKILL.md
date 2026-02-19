@@ -33,25 +33,25 @@ Check for `assets/config.json` in this skill's directory.
   "areas": {
     "work": {
       "description": "Day job tasks, meetings, team communication",
-      "examples": ["Prepare slides for team standup", "Review PR from Sarah"]
+      "examples": ["Prepare slides for team standup", "Coordinate with project lead"]
     },
     "personal": {
       "description": "Family, home, errands, health",
-      "examples": ["Book dentist appointment", "Pick up groceries"]
+      "examples": ["Book a doctor appointment", "Handle home admin"]
     }
   },
   "tags": {
     "important": {
       "description": "Has a hard deadline, scheduled meeting, or clear strategic urgency",
-      "examples": ["Submit tax return by Friday", "Prepare board deck for Monday"]
+      "examples": ["Finish something by a deadline", "Prepare for a scheduled meeting"]
     },
     "waiting": {
       "description": "Explicitly blocked on another person — waiting for someone or pending a response",
-      "examples": ["Waiting for John to review contract", "Pending approval from finance"]
+      "examples": ["Waiting for a review or approval", "Pending a response"]
     },
     "quick": {
       "description": "Single-step task under 15 minutes — not multi-step work",
-      "examples": ["Reply to Sarah's Slack message", "Check build status"]
+      "examples": ["Reply to a message", "Check a status", "Approve a request"]
     }
   },
   "daily_routine": [
@@ -63,7 +63,7 @@ Check for `assets/config.json` in this skill's directory.
 
 Areas, tags, and daily routines are fully customizable. The examples above are defaults — the user defines what fits their workflow. A `null` area means uncategorized.
 
-Each area and tag has up to 10 examples. Examples should cover distinct categories without overlap — no need to fill all 10 slots, just enough to represent the range.
+Each area and tag has up to 10 examples. Examples should cover distinct categories without overlap — no need to fill all 10 slots, just enough to represent the range. Area examples should include domain context to distinguish between areas (e.g. "Coordinate with IBM team"). Tag examples should be generic patterns about the nature of the task (e.g. "Reply to a message").
 
 ## Step 1. Gather Data
 
