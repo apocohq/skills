@@ -60,7 +60,7 @@ For items without an area, use the config area descriptions to determine the bes
 
 ### B. Tag Untagged Items
 
-For items without tags, use the config tag descriptions to determine which apply. Tag generously — if it qualifies, tag it. Flag genuinely ambiguous items in the briefing.
+For items without tags, use the config tag descriptions to determine which apply. **Be conservative** — only apply a tag when the todo title clearly and obviously matches the tag description. Do not infer or guess.
 
 **Wait for all `things_update_todo` calls to complete before proceeding.**
 
@@ -74,7 +74,7 @@ Match flexibly (case-insensitive, similar wording counts). Skip on weekends.
 
 Use Peter Drucker's "Effective Executive" lens — prioritize by contribution, not busyness. *"First things first, second things not at all."*
 
-**🔴 Must do** — Deadlines, meetings, items tagged as high priority. *"What can only I do that, if done really well, will make a real difference?"*
+**🔴 Must do** — Deadlines, meetings, items tagged as important. *"What can only I do that, if done really well, will make a real difference?"*
 **🟡 Should do** — High-impact strategic work. *"What is the greatest contribution I can make?"*
 **🟢 Could do** — Non-urgent items, learning, low-priority personal.
 **📋 Daily Routine** — Items from `daily_routine` in config.
@@ -114,6 +114,20 @@ When the user asks to add a todo to Things:
 2. **Assign to area** — Use config area descriptions to pick the best fit; default to the first area if ambiguous
 3. **Schedule appropriately** — Use `when="today"` by default, or adjust based on context
 4. **Extract details** — If the message contains specific information (names, numbers, deadlines), include them in the title or notes
+
+## Learning Mode
+
+Activate when the user asks to run in learning mode (e.g. "learning mode", "learn", "improve config").
+
+1. Load `assets/config.json`
+2. Fetch todos across all lists (`things_get_today`, `things_get_anytime`, `things_get_upcoming`, `things_get_someday`)
+3. Compare todos against the current config and identify gaps:
+   - Todos that don't fit any existing area well
+   - Todos where no tag description clearly applies but a tag probably should
+   - Area or tag descriptions that are too narrow to cover the todos they contain
+4. Propose config updates — refine descriptions, add new areas or tags if needed
+5. Present the diff to the user for confirmation, then save to `assets/config.json`
+6. Ask the user if they want to proceed with the normal morning review (Steps 1-4)
 
 ## Principles
 
