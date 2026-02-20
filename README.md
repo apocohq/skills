@@ -12,13 +12,13 @@ Also works directly in [Claude Code](https://docs.anthropic.com/en/docs/claude-c
 
 ## Skills
 
-### gmail-multi-inbox
+### 📬 gmail-multi-inbox
 
 Tired of a messy inbox? This skill scans your Gmail, figures out who's emailing you, and organizes everything into clean Multiple Inbox sections. It generates a Google Apps Script that sets up labels and filters automatically. It can also help you find noisy senders worth unsubscribing from. Keeps a local config, so you can run it again to add new senders or tweak categories over time.
 
 **Use when:** organizing Gmail, setting up multiple inboxes, managing labels and filters, cleaning up subscriptions.
 
-### things-morning-organizer
+### ✅ things-morning-organizer
 
 Never sure what to focus on in the morning? Born out of spending 15–25 minutes every Monday manually sorting through 40+ todos ([full story](https://www.havlena.com/p/i-automated-monday-morning-triage)), this skill reviews your [Things 3](https://culturedcode.com/things/) todos, moves them into the right areas, tags what needs attention, and gives you a prioritized 30-second briefing so you know exactly where to start.
 
