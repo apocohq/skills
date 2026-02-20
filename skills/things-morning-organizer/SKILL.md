@@ -3,7 +3,7 @@ name: things-morning-organizer
 description: "Morning review and prioritization of Things todos. Use this skill every morning, or whenever the user asks to review, triage, categorize, or prioritize their Things tasks. Also trigger when the user says things like 'what should I work on today', 'organize my todos', 'morning routine', or 'daily review'."
 metadata:
   author: apoco
-  version: "1.0.0"
+  version: "1.0.1"
   argument-hint: "[silent|learning]"
 ---
 
