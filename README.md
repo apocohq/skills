@@ -28,6 +28,7 @@ Features:
 - **Daily routines** - Automatically creates recurring weekday todos (e.g. "Check email") if they're missing from Today.
 - **Drucker-style briefing** - Prioritizes your day into Must do / Should do / Could do using Peter Drucker's "Effective Executive" lens, with a motivational quote.
 - **Todo creation** - Add todos by describing them naturally; the skill rephrases, assigns an area, and schedules them.
+- **Silent mode** - Run with `[silent]` for automated/headless execution via `-p` mode. Skips all prompts, requires existing config, and outputs only the final briefing.
 - **Learning mode** - Run with `[learning]` to compare your todos against the config and refine area/tag descriptions and examples over time.
 - **Idempotent** - Safe to run multiple times a day. Skips items that already have areas and tags, and won't duplicate daily routine todos.
 

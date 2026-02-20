@@ -4,7 +4,7 @@ description: "Morning review and prioritization of Things todos. Use this skill 
 metadata:
   author: apoco
   version: "1.0.0"
-  argument-hint: "[learning]"
+  argument-hint: "[silent|learning]"
 ---
 
 # Morning Review
@@ -135,6 +135,18 @@ When the user asks to add a todo to Things:
 2. **Assign to area** — Use config area descriptions and examples to pick the best fit; default to the first area if ambiguous
 3. **Schedule appropriately** — Use `when="today"` by default, or adjust based on context
 4. **Extract details** — If the message contains specific information (names, numbers, deadlines), include them in the title or notes
+
+## Silent Mode
+
+Activate when the argument is "silent" (e.g. `/things-morning-organizer silent`). Designed for automated/headless execution via `-p` mode.
+
+**Requirements:**
+- Config MUST already exist — if `assets/config.json` is missing, output an error message and exit
+- Skip Step 0 entirely (no configuration, no questions)
+- Execute Steps 1 → 2 → 3 → 4 in a single pass
+- Do NOT ask any questions or wait for user input
+- Do NOT use `AskUserQuestion` tool
+- Output ONLY the final briefing from Step 4 (no intermediate status messages)
 
 ## Learning Mode
 
